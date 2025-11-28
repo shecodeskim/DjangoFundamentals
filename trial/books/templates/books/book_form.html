@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit {{ form.instance.title }}{% else %}Add New Book{% endif %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .required label:after {
+            content: " *";
+            color: #dc3545;
+        }
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .form-section h5 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        .book-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+        .btn-custom {
+            padding: 10px 25px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'book_list' %}">
+                <span class="book-icon">📚</span>
+                Book Management System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a href="{% url 'book_list' %}" class="btn btn-light btn-sm">
+                    ← Back to Books
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="form-container">
+            <!-- Header -->
+            <div class="card-header bg-primary text-white py-4 rounded-top">
+                <div class="text-center">
+                    <h1 class="h3 mb-2">
+                        {% if form.instance.pk %}
+                        ✏️ Edit Book
+                        {% else %}
+                        📖 Add New Book
+                        {% endif %}
+                    </h1>
+                    <p class="mb-0 opacity-75">
+                        {% if form.instance.pk %}
+                        Update the details of "{{ form.instance.title }}"
+                        {% else %}
+                        Fill in the details to add a new book to your collection
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Error Messages -->
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading">⚠️ Please correct the following errors:</h5>
+                    <ul class="mb-0">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+
+                <!-- Book Form -->
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information Section -->
+                    <div class="form-section">
+                        <h5>📋 Basic Information</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-3 required">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">Book Title</label>
+                                <input type="text" 
+                                       name="{{ form.title.name }}" 
+                                       id="{{ form.title.id_for_label }}" 
+                                       class="form-control form-control-lg" 
+                                       value="{{ form.title.value|default:'' }}"
+                                       placeholder="Enter the book title"
+                                       required>
+                                {% if form.title.help_text %}
+                                <div class="form-text text-muted">{{ form.title.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-12 mb-3 required">
+                                <label for="{{ form.author.id_for_label }}" class="form-label fw-semibold">Author Name</label>
+                                <input type="text" 
+                                       name="{{ form.author.name }}" 
+                                       id="{{ form.author.id_for_label }}" 
+                                       class="form-control" 
+                                       value="{{ form.author.value|default:'' }}"
+                                       placeholder="Enter the author's full name"
+                                       required>
+                                {% if form.author.help_text %}
+                                <div class="form-text text-muted">{{ form.author.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publication Details Section -->
+                    <div class="form-section">
+                        <h5>📅 Publication Details</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3 required">
+                                <label for="{{ form.published_date.id_for_label }}" class="form-label fw-semibold">Published Date</label>
+                                <input type="date" 
+                                       name="{{ form.published_date.name }}" 
+                                       id="{{ form.published_date.id_for_label }}" 
+                                       class="form-control" 
+                                       value="{{ form.published_date.value|default:'' }}"
+                                       required>
+                                {% if form.published_date.help_text %}
+                                <div class="form-text text-muted">{{ form.published_date.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3 required">
+                                <label for="{{ form.isbn.id_for_label }}" class="form-label fw-semibold">ISBN Number</label>
+                                <input type="text" 
+                                       name="{{ form.isbn.name }}" 
+                                       id="{{ form.isbn.id_for_label }}" 
+                                       class="form-control" 
+                                       value="{{ form.isbn.value|default:'' }}"
+                                       placeholder="Enter 13-digit ISBN"
+                                       maxlength="13"
+                                       required>
+                                {% if form.isbn.help_text %}
+                                <div class="form-text text-muted">{{ form.isbn.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Section -->
+                    <div class="form-section">
+                        <h5>💰 Pricing Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3 required">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fw-semibold">Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" 
+                                           name="{{ form.price.name }}" 
+                                           id="{{ form.price.id_for_label }}" 
+                                           class="form-control" 
+                                           value="{{ form.price.value|default:'' }}"
+                                           placeholder="0.00"
+                                           step="0.01"
+                                           min="0"
+                                           required>
+                                </div>
+                                {% if form.price.help_text %}
+                                <div class="form-text text-muted">{{ form.price.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end align-items-center mt-4 pt-3 border-top">
+                        <a href="{% url 'book_list' %}" class="btn btn-outline-secondary btn-custom me-md-2">
+                            ❌ Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-custom">
+                            {% if form.instance.pk %}
+                            💾 Update Book
+                            {% else %}
+                            ➕ Create Book
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quick Actions Footer -->
+            {% if form.instance.pk %}
+            <div class="card-footer bg-light py-3 rounded-bottom">
+                <div class="text-center">
+                    <small class="text-muted">
+                        <a href="{% url 'book_detail' form.instance.pk %}" class="text-decoration-none me-3">
+                            👁️ View This Book
+                        </a>
+                        |
+                        <a href="{% url 'book_create' %}" class="text-decoration-none ms-3">
+                            📖 Add Another Book
+                        </a>
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Help Text -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">💡 Tips:</h6>
+                    <ul class="mb-0">
+                        <li>All fields marked with <span class="text-danger">*</span> are required</li>
+                        <li>ISBN should be 13 digits without spaces or hyphens</li>
+                        <li>Use the date picker for the publication date</li>
+                        <li>Price should be in US dollars (USD)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">
+                <strong>Book Management System</strong> &copy; 2024 
+                <span class="mx-2">|</span>
+                Manage your book collection with ease
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Enhanced Form Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus styles to form inputs
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focus-ring');
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focus-ring');
+                });
+            });
+
+            // Auto-format ISBN input
+            const isbnInput = document.getElementById('{{ form.isbn.id_for_label }}');
+            if (isbnInput) {
+                isbnInput.addEventListener('input', function(e) {
+                    // Remove any non-digit characters
+                    this.value = this.value.replace(/\D/g, '');
+                });
+            }
+
+            // Price input validation
+            const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+            if (priceInput) {
+                priceInput.addEventListener('blur', function(e) {
+                    if (this.value && parseFloat(this.value) < 0) {
+                        this.value = '0.00';
+                    }
+                });
+            }
+
+            // Add character counter for title and author
+            const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+            const authorInput = document.getElementById('{{ form.author.id_for_label }}');
+            
+            function createCounter(input, maxLength) {
+                const counter = document.createElement('div');
+                counter.className = 'form-text text-end character-counter';
+                counter.style.fontSize = '0.8rem';
+                input.parentElement.appendChild(counter);
+                
+                function updateCounter() {
+                    const length = input.value.length;
+                    counter.textContent = `${length}/${maxLength} characters`;
+                    if (length > maxLength * 0.8) {
+                        counter.className = 'form-text text-end character-counter text-warning';
+                    } else {
+                        counter.className = 'form-text text-end character-counter text-muted';
+                    }
+                }
+                
+                input.addEventListener('input', updateCounter);
+                updateCounter();
+            }
+
+            if (titleInput) createCounter(titleInput, 200);
+            if (authorInput) createCounter(authorInput, 100);
+        });
+    </script>
+</body>
+</html>
